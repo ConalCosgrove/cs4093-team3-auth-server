@@ -16,12 +16,14 @@ mongoose
   .connect(config.dbUrl, { useNewUrlParser: true })
   .then(console.log('Connected to DB 🎉'))
   .catch((err) => {
-    console.error(err);
+    console.log(err);
   });
 
+// use specified routes
 app.use('/login', login);
 app.use('/users', user);
 
+// start server listening
 app.listen(port, () => {
   console.log(`Server is up and running on port number ${port}`);
 });

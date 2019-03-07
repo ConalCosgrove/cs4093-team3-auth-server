@@ -10,9 +10,12 @@ const router = express.Router();
 router.post('/', (req, res) => {
   const { email, password } = req.body;
   if (!email || !password) {
-    res.status(400).json({ message: 'Request missing email/password field(s)' });
+    res
+      .status(400)
+      .json({ message: 'Request missing email/password field(s)' });
   } else {
-    User.findOne({ email })
+    User
+      .findOne({ email })
       .then((user) => {
         if (!user) {
           throw new Error('User not found.');
@@ -44,8 +47,7 @@ router.post('/', (req, res) => {
               }
             });
         }
-      })
-      .catch((err) => {
+      }).catch((err) => {
         res.status(400).json({ message: 'User not found.' });
         console.log(err);
       });
