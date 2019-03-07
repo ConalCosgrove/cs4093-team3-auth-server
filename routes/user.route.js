@@ -18,7 +18,11 @@ router.get('/', auth, (req, res) => {
           .where({ email })
           .select('-password')
           .then((users) => {
-            res.json(users);
+            if (users.length) {
+              res.json(users);
+            } else {
+              res.status(400).json({ message: 'No users found' });
+            }
           });
       } else {
         res.status(401).json({ message: 'Permission denied' });
