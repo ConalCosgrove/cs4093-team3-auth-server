@@ -5,6 +5,8 @@ const config = require('./config.js');
 const user = require('./routes/user.route.js');
 const login = require('./routes/login.route.js');
 
+const { port } = config;
+
 // initialize our express app
 const app = express();
 app.use(express.json());
@@ -17,7 +19,6 @@ mongoose
     console.error(err);
   });
 
-const port = 1234;
 app.use('/login', login);
 app.use('/users', user);
 
