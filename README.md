@@ -11,6 +11,7 @@ Provides Signup and login functionality, sessions maintained using JWT.
 ## Environment Variables
 - ``` JWT_SECRET ```: Secret used for encrypting/decrypting JWT's
 - ``` MONGO_DB_URI ```: URI of mongoDB cluster used for storing users.
+- ``` TOKEN_EXPIRY_TIME ```: Length of time that JWT is valid, in seconds.
 
 ## Setup
 - ``` git clone <this repo> ```

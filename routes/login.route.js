@@ -4,6 +4,7 @@ const bcrypt = require('bcryptjs');
 const User = require('../models/user.model');
 const config = require('../config.js');
 
+const { jwtSecret, tokenExpiryTime }
 const router = express.Router();
 
 router.post('/', (req, res) => {
@@ -22,21 +23,24 @@ router.post('/', (req, res) => {
               if (!isCorrect) {
                 res.status(400).json({ message: 'Invalid login details.' });
               } else {
-                jwt
-                  .sign({ id: user.id }, config.jwtSecret,
-                    { expiresIn: 3600 },
-                    (error, token) => {
-                      if (error) {
-                        throw error;
-                      }
-                      res.json({
-                        token,
-                        user: {
-                          email: user.email,
-                          userType: user.userType,
-                        },
-                      });
+                // Create JWT, including how long until it expires.
+                jwt.sign(
+                  { id: user.id },
+                  jwtSecret,
+                  { expiresIn: tokenExpiryTime },
+                  (error, token) => {
+                    if (error) {
+                      throw error;
+                    }
+                    res.json({
+                      token,
+                      user: {
+                        email: user.email,
+                        userType: user.userType,
+                      },
                     });
+                  },
+                );
               }
             });
         }
