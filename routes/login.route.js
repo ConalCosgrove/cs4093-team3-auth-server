@@ -4,7 +4,7 @@ const bcrypt = require('bcryptjs');
 const User = require('../models/user.model');
 const config = require('../config.js');
 
-const { jwtSecret, tokenExpiryTime }
+const { jwtSecret, tokenExpiryTime } = config;
 const router = express.Router();
 
 router.post('/', (req, res) => {
