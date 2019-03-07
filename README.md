@@ -3,9 +3,9 @@
 Provides Signup and login functionality, sessions maintained using JWT.
 
 ## Project Structure
-- /models - Database models for mongoose.
-- /routes - API routes.
-- /middleware - Handlers to use while processing requests.
+- models/ - Database models for mongoose.
+- routes/ - API routes.
+- middleware/ - Handlers to use while processing requests.
 - config.js - Imports environment variables from .env and makes them available.
 - index.js - Main js file.
 ## Environment Variables
