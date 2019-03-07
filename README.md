@@ -2,6 +2,10 @@
 
 Provides Signup and login functionality, sessions maintained using JWT.
 
+## Project Structure
+- models
+- routes
+- middleware
 ## Environment Variables
 - ``` JWT_SECRET ```: Secret used for encrypting/decrypting JWT's
 - ``` MONGO_DB_URI ```: URI of mongoDB cluster used for storing users.
