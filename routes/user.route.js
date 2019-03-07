@@ -21,11 +21,15 @@ router.get('/', auth, (req, res) => {
             if (users.length) {
               res.json(users);
             } else {
-              res.status(400).json({ message: 'No users found' });
+              res
+                .status(400)
+                .json({ message: 'No users found' });
             }
           });
       } else {
-        res.status(401).json({ message: 'Permission denied' });
+        res
+          .status(401)
+          .json({ message: 'Permission denied' });
       }
     });
 });
@@ -62,15 +66,20 @@ router.post('/', auth, (req, res) => {
             newUser.password = hash;
             newUser.save().then((createdUser, dbError) => {
               if (dbError) {
-                res.status(400).json({ message: dbError });
+                res
+                  .status(400)
+                  .json({ message: dbError });
               }
-              res.json({
-                user: {
-                  email: createdUser.email,
-                  userType: createdUser.userType,
-                  id: createdUser.id,
-                },
-              });
+              res
+                .json(
+                  {
+                    user: {
+                      email: createdUser.email,
+                      userType: createdUser.userType,
+                      id: createdUser.id,
+                    },
+                  },
+                );
             });
           });
         });
