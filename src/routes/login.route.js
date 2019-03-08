@@ -1,10 +1,14 @@
+const bcrypt = require('bcryptjs');
 const express = require('express');
 const jwt = require('jsonwebtoken');
-const bcrypt = require('bcryptjs');
-const User = require('../models/user.model');
-const config = require('../config.js');
 
-const { jwtSecret, tokenExpiryTime } = config;
+const User = require('../models/user.model');
+
+const {
+  JWT_SECRET: jwtSecret,
+  TOKEN_EXPIRY_TIME: tokenExpiryTime = 3600,
+} = process.env;
+
 const router = express.Router();
 
 router.post('/', (req, res) => {

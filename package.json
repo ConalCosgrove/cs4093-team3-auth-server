@@ -4,9 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js",
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "nodemon index.js"
+    "dev": "nodemon src/server.js",
+    "start": "node src/server.js"
   },
   "author": "Conal Cosgrove",
   "license": "ISC",

@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken');
-const config = require('../config.js');
+
+const { JWT_SECRET: jwtSecret } = process.env;
 
 function auth(req, res, next) {
   const token = req.header('Authorization');
@@ -9,7 +10,7 @@ function auth(req, res, next) {
       .json({ message: 'No token supplied, access denied' });
   } else {
     try {
-      const userId = jwt.verify(token, config.jwtSecret);
+      const userId = jwt.verify(token, jwtSecret);
       if (!userId) {
         res
           .status(401)
