@@ -1,4 +1,5 @@
 const { genSalt, hash } = require('bcryptjs');
+const TypedError = require('error/typed');
 const { Router } = require('express');
 const { BAD_REQUEST, INTERNAL_SERVER_ERROR, UNAUTHORIZED } = require('http-status-codes');
 const { pick } = require('lodash');
@@ -14,30 +15,50 @@ router.get('/', auth, (req, res) => {
   const { email } = req.body;
   const { id: userId } = req.user;
 
-  User
-    .findById(userId)
-    .select('-password')
+  const promise = email
+    ? User
+      .findById(userId)
+      .select('-password')
+    : Promise.reject(
+      TypedError({
+        message: 'missing required parameter: email',
+        statusCode: BAD_REQUEST,
+      }),
+    );
+
+  promise
     .then((user) => {
-      if (!email) {
-        res.status(BAD_REQUEST).json({ message: 'missing required parameter: email' });
-      } else if (email === user.email || user.userType === 'nurse') {
-        User
+      if (email === user.email || user.userType === 'nurse') {
+        return User
           .find()
           .where({ email })
-          .select('-password')
-          .then((users) => {
-            if (users.length > 0) {
-              res.json(users[0]);
-            } else {
-              res
-                .status(BAD_REQUEST)
-                .json({ message: 'no users found' });
-            }
-          });
+          .select('-password');
+      }
+
+      throw TypedError({
+        message: 'permission denied',
+        statusCode: UNAUTHORIZED,
+      });
+    })
+    .then((users) => {
+      if (users.length === 0) {
+        throw TypedError({
+          message: 'no users found',
+          statusCode: BAD_REQUEST,
+        });
+      }
+
+      res.json(users[0]);
+    })
+    .catch((error) => {
+      const { message, statusCode } = error;
+
+      // We only want to return our custom errors to the client
+      if (statusCode) {
+        res.status(statusCode).json({ message });
       } else {
-        res
-          .status(UNAUTHORIZED)
-          .json({ message: 'permission denied' });
+        res.status(INTERNAL_SERVER_ERROR).end();
+        logger.error(error);
       }
     });
 });
@@ -45,51 +66,72 @@ router.get('/', auth, (req, res) => {
 router.post('/', auth, (req, res) => {
   const { email, password, userType } = req.body;
 
-  if (!email || !password || !userType) {
-    res
-      .status(BAD_REQUEST)
-      .json({ message: 'request body is missing required field' });
-  } else {
-    User
-      .findOne({ email })
-      .then((user) => {
-        if (user) {
-          res.status(BAD_REQUEST).json({ message: 'user with this email already exists.' });
-        } else {
-          // Hash password
-          genSalt(10, (err, salt) => {
-            if (err) {
-              throw err;
-            }
+  const promise = !email || !password || !userType
+    ? Promise.reject(
+      TypedError({
+        message: 'request body is missing required field',
+        statusCode: BAD_REQUEST,
+      }),
+    )
+    : User.findOne({ email });
 
-            hash(password, salt, (error, hashed) => {
-              if (error) {
-                throw error;
-              }
+  promise
+    .then((user) => {
+      if (user) {
+        throw TypedError({
+          message: 'user with this email already exists',
+          statusCode: BAD_REQUEST,
+        });
+      }
 
-              const newUser = new User({
-                email,
-                password: hashed,
-                userType,
-              });
-
-              newUser
-                .save()
-                .then((createdUser, dbError) => {
-                  if (dbError) {
-                    throw dbError;
-                  }
-
-                  res.json({ user: pick(createdUser, ['email, id, usedType']) });
-                });
-            });
-          });
-        }
+      return new Promise((resolve, reject) => {
+        genSalt(10, (error, salt) => {
+          if (error) {
+            reject(error);
+          } else {
+            resolve(salt);
+          }
+        });
+      });
+    })
+    .then(salt => (
+      new Promise((resolve, reject) => {
+        hash(password, salt, (error, hashed) => {
+          if (error) {
+            reject(error);
+          } else {
+            resolve(hashed);
+          }
+        });
       })
-      .catch((error) => {
+    ))
+    .then((hashed) => {
+      const newUser = new User({
+        email,
+        password: hashed,
+        userType,
+      });
+
+      return newUser.save();
+    })
+    .then((createdUser, dbError) => {
+      if (dbError) {
+        throw dbError;
+      }
+
+      res.json({ user: pick(createdUser, ['email, id, usedType']) });
+    })
+    .catch((error) => {
+      const { message, statusCode } = error;
+
+      // We only want to return our custom errors to the client
+      if (statusCode) {
+        res.status(statusCode).json({ message });
+      } else {
         res.status(INTERNAL_SERVER_ERROR).end();
         logger.error(error);
-      });
-  }
+      }
+    });
 });
+
 module.exports = router;
