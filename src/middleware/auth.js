@@ -1,4 +1,5 @@
 const jwt = require('jsonwebtoken');
+const { UNAUTHORIZED } = require('http-status-codes');
 
 const { JWT_SECRET: jwtSecret } = process.env;
 
@@ -6,14 +7,14 @@ function auth(req, res, next) {
   const token = req.header('Authorization');
   if (!token) {
     res
-      .status(401)
+      .status(UNAUTHORIZED)
       .json({ message: 'No token supplied, access denied' });
   } else {
     try {
       const userId = jwt.verify(token, jwtSecret);
       if (!userId) {
         res
-          .status(401)
+          .status(UNAUTHORIZED)
           .json({ message: 'Invalid token, access denied' });
       } else {
         req.user = userId;
@@ -21,7 +22,7 @@ function auth(req, res, next) {
       }
     } catch (e) {
       res
-        .status(401)
+        .status(UNAUTHORIZED)
         .json({ message: 'Failed to authenticate, permission denied.' });
     }
   }

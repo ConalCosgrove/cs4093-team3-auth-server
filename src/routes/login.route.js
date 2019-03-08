@@ -1,5 +1,6 @@
 const bcrypt = require('bcryptjs');
 const express = require('express');
+const { BAD_REQUEST } = require('http-status-codes');
 const jwt = require('jsonwebtoken');
 
 const User = require('../models/user.model');
@@ -15,8 +16,8 @@ router.post('/', (req, res) => {
   const { email, password } = req.body;
   if (!email || !password) {
     res
-      .status(400)
-      .json({ message: 'Request missing email/password field(s)' });
+      .status(BAD_REQUEST)
+      .json({ message: 'request missing email/password field(s)' });
   } else {
     User
       .findOne({ email })
@@ -28,7 +29,7 @@ router.post('/', (req, res) => {
           bcrypt.compare(password, user.password)
             .then((isCorrect) => {
               if (!isCorrect) {
-                res.status(400).json({ message: 'Invalid login details.' });
+                res.status(BAD_REQUEST).json({ message: 'invalid login details' });
               } else {
                 // Create JWT, including how long until it expires.
                 jwt.sign(
@@ -51,10 +52,7 @@ router.post('/', (req, res) => {
               }
             });
         }
-      }).catch((err) => {
-        res.status(400).json({ message: 'User not found.' });
-        console.log(err);
-      });
+      }).catch(() => res.status(BAD_REQUEST).json({ message: 'user not found' }));
   }
 });
 

@@ -1,5 +1,6 @@
 const bcrypt = require('bcryptjs');
 const express = require('express');
+const { BAD_REQUEST } = require('http-status-codes');
 
 const auth = require('../middleware/auth.js');
 const User = require('../models/user.model');
@@ -14,7 +15,7 @@ router.get('/', auth, (req, res) => {
     .select('-password')
     .then((user) => {
       if (!email) {
-        res.status(400).json({ message: 'Missing required parameter: email' });
+        res.status(BAD_REQUEST).json({ message: 'Missing required parameter: email' });
       } else if (email === user.email || user.userType === 'nurse') {
         User.find()
           .where({ email })
@@ -24,7 +25,7 @@ router.get('/', auth, (req, res) => {
               res.json(users[ZERO]);
             } else {
               res
-                .status(400)
+                .status(BAD_REQUEST)
                 .json({ message: 'No users found' });
             }
           });
@@ -41,13 +42,13 @@ router.post('/', auth, (req, res) => {
 
   if (!email || !password || !userType) {
     res
-      .status(400)
+      .status(BAD_REQUEST)
       .json({ message: 'Request body is missing required field.' });
   } else {
     User.findOne({ email }).then((user) => {
       if (user) {
         res
-          .status(400)
+          .status(BAD_REQUEST)
           .json({ message: 'User with this email already exists.' });
       } else {
         const newUser = new User({
@@ -69,7 +70,7 @@ router.post('/', auth, (req, res) => {
             newUser.save().then((createdUser, dbError) => {
               if (dbError) {
                 res
-                  .status(400)
+                  .status(BAD_REQUEST)
                   .json({ message: dbError });
               }
               res
