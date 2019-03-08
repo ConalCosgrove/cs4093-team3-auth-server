@@ -3,6 +3,7 @@ const bcrypt = require('bcryptjs');
 const User = require('../models/user.model');
 const auth = require('../middleware/auth.js');
 
+const ZERO = 0;
 const router = express.Router();
 
 router.get('/', auth, (req, res) => {
@@ -19,7 +20,7 @@ router.get('/', auth, (req, res) => {
           .select('-password')
           .then((users) => {
             if (users.length) {
-              res.json(users);
+              res.json(users[ZERO]);
             } else {
               res
                 .status(400)
