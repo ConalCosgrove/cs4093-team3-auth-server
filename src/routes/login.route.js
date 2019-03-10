@@ -1,4 +1,5 @@
 const { compare } = require('bcryptjs');
+const { config: loadEnv } = require('dotenv');
 const TypedError = require('error/typed');
 const { Router } = require('express');
 const { BAD_REQUEST, INTERNAL_SERVER_ERROR } = require('http-status-codes');
@@ -8,6 +9,7 @@ const { default: createLogger } = require('logging');
 
 const User = require('../models/user.model');
 
+loadEnv();
 const {
   JWT_SECRET: jwtSecret,
   TOKEN_EXPIRY_TIME: tokenExpiryTime = 3600,
@@ -38,7 +40,7 @@ router.post('/', (req, res) => {
       }
 
       // Validate password
-      compare(password, user.password)
+      return compare(password, user.password)
         .then((isCorrect) => {
           if (!isCorrect) {
             throw TypedError({
@@ -68,6 +70,8 @@ router.post('/', (req, res) => {
             token,
             user: pick(user, ['email', 'userType']),
           });
+
+          return undefined;
         })
         .catch((error) => {
           // Since we're in a nested promise, we need to throw this error up

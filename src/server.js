@@ -1,7 +1,9 @@
+const { config: loadEnv } = require('dotenv');
 const { default: createLogger } = require('logging');
 
 const app = require('./app');
 
+loadEnv();
 const { PORT: port } = process.env;
 
 const logger = createLogger('tt:server');

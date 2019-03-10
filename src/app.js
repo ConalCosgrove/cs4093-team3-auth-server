@@ -1,4 +1,4 @@
-// const dotenv = require('dotenv').config();
+const { config: loadEnv } = require('dotenv');
 const express = require('express');
 const { default: createLogger } = require('logging');
 const mongoose = require('mongoose');
@@ -6,6 +6,7 @@ const mongoose = require('mongoose');
 const user = require('./routes/user.route.js');
 const login = require('./routes/login.route.js');
 
+loadEnv();
 const { MONGO_DB_URI: dbUrl } = process.env;
 
 const logger = createLogger('tt:app');
@@ -18,7 +19,7 @@ app.use(express.json());
 mongoose
   .connect(dbUrl, { useNewUrlParser: true })
   .then(logger.debug('connected to DB 🎉'))
-  .catch(err => logger.error(err));
+  .catch(error => logger.error(error));
 
 // Use specified routes
 app.use('/login', login);

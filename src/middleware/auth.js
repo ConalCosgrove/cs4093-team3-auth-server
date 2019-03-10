@@ -1,6 +1,8 @@
+const { config: loadEnv } = require('dotenv');
 const jwt = require('jsonwebtoken');
 const { UNAUTHORIZED } = require('http-status-codes');
 
+loadEnv();
 const { JWT_SECRET: jwtSecret } = process.env;
 
 function auth(req, res, next) {
