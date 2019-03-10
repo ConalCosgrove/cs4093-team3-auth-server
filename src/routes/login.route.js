@@ -1,18 +1,19 @@
 const { compare } = require('bcryptjs');
 const { config: loadEnv } = require('dotenv');
-const TypedError = require('error/typed');
 const { Router } = require('express');
 const { BAD_REQUEST, INTERNAL_SERVER_ERROR } = require('http-status-codes');
 const { sign } = require('jsonwebtoken');
 const { pick } = require('lodash');
 const { default: createLogger } = require('logging');
 
+const { INVALID_CREDENTIALS, MISSING_EMAIL_PASSWORD } = require('../constants/errors');
 const User = require('../models/user.model');
+const { RequestError, isRequestError } = require('../utils/errorTypes');
 
 loadEnv();
 const {
   JWT_SECRET: jwtSecret,
-  TOKEN_EXPIRY_TIME: tokenExpiryTime = 3600,
+  JWT_LIFESPAN: jwtLifespan = 3600,
 } = process.env;
 
 const logger = createLogger('tt:auth');
@@ -22,37 +23,26 @@ router.post('/', (req, res) => {
   const { email, password } = req.body;
 
   const promise = !email || !password
-    ? Promise.reject(
-      TypedError({
-        message: 'missing email/password field(s)',
-        statusCode: BAD_REQUEST,
-      }),
-    )
+    ? Promise.reject(RequestError({ statusCode: BAD_REQUEST, title: MISSING_EMAIL_PASSWORD }))
     : User.findOne({ email });
 
   promise
     .then((user) => {
       if (!user) {
-        throw TypedError({
-          message: 'user not found',
-          statusCode: BAD_REQUEST,
-        });
+        throw RequestError({ statusCode: BAD_REQUEST, title: INVALID_CREDENTIALS });
       }
 
-      // Validate password
+      // eslint-disable-next-line promise/no-nesting
       return compare(password, user.password)
         .then((isCorrect) => {
           if (!isCorrect) {
-            throw TypedError({
-              message: 'invalid login details',
-              statusCode: BAD_REQUEST,
-            });
+            throw RequestError({ statusCode: BAD_REQUEST, title: INVALID_CREDENTIALS });
           }
 
           // Convert `jwt.sign` callback into Promise
           return new Promise((resolve, reject) => {
             const payload = { id: user.id };
-            const options = { expiresIn: tokenExpiryTime };
+            const options = { expiresIn: jwtLifespan };
             const callback = (error, token) => {
               if (error) {
                 reject(error);
@@ -79,10 +69,9 @@ router.post('/', (req, res) => {
         });
     })
     .catch((error) => {
-      const { message, statusCode } = error;
-
       // We only want to return our custom errors to the client
-      if (statusCode) {
+      if (isRequestError(error)) {
+        const { message, statusCode } = error;
         res.status(statusCode).json({ message });
       } else {
         res.status(INTERNAL_SERVER_ERROR).end();

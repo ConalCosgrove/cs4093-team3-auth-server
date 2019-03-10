@@ -1,5 +1,10 @@
 {
-  "extends": "airbnb",
+  "extends": [
+    "airbnb",
+    "plugin:jest/recommended",
+    "plugin:promise/recommended"
+  ],
+  "plugins": ["jest", "promise"],
   "rules": {
     "import/prefer-default-export": "off"
   }

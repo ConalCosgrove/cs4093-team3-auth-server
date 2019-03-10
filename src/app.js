@@ -7,7 +7,7 @@ const user = require('./routes/user.route.js');
 const login = require('./routes/login.route.js');
 
 loadEnv();
-const { MONGO_DB_URI: dbUrl } = process.env;
+const { MONGODB_URI: dbUrl } = process.env;
 
 const logger = createLogger('tt:app');
 

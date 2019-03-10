@@ -12,9 +12,10 @@ Provides signup and login functionality. Sessions are maintained using JWT.
 
 ## Environment Variables
 
+- `JWT_LIFESPAN`: Length of time that JWTs are valid, in seconds.
 - `JWT_SECRET`: Secret used for encrypting / decrypting JWTs.
-- `MONGO_DB_URI`: URI of mongoDB cluster used for storing users.
-- `TOKEN_EXPIRY_TIME`: Length of time that JWT is valid, in seconds.
+- `MONGODB_URI`: URI of mongoDB cluster used for storing users.
+- `PORT`: Port on which to run server.
 
 ## Setup
 

@@ -12,5 +12,4 @@ if (!port) {
   throw Error('environment variable PORT not set');
 }
 
-// start server listening
-app.listen(port, () => logger.info('server running on port', port));
+app.listen(port, () => logger.info('server listening on port', port));

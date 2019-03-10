@@ -1,28 +1,27 @@
 const { config: loadEnv } = require('dotenv');
 const jwt = require('jsonwebtoken');
-const { UNAUTHORIZED } = require('http-status-codes');
+const { BAD_REQUEST } = require('http-status-codes');
+
+const { BAD_TOKEN, MISSING_TOKEN } = require('../constants/errors');
 
 loadEnv();
 const { JWT_SECRET: jwtSecret } = process.env;
 
-function auth(req, res, next) {
-  const token = req.header('Authorization');
+const auth = (req, res, next) => {
+  const token = req.get('Authorization');
 
   if (!token) {
-    res
-      .status(UNAUTHORIZED)
-      .json({ message: 'no token supplied, access denied' });
+    res.status(BAD_REQUEST).json({ message: MISSING_TOKEN });
   } else {
     jwt.verify(token, jwtSecret, (error, decoded) => {
       if (error) {
-        res
-          .status(UNAUTHORIZED)
-          .json({ message: 'failed to authenticate, permission denied' });
+        res.status(BAD_REQUEST).json({ message: BAD_TOKEN });
       } else {
         req.user = decoded;
         next();
       }
     });
   }
-}
+};
+
 module.exports = auth;
