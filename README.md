@@ -1,4 +1,4 @@
-# TB or not TB: Authorization Server
+# CS4093 TEAM 3: Authorization Server
 
 Provides signup and login functionality. Sessions are maintained using JWT.
 
